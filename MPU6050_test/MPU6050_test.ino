@@ -45,9 +45,11 @@ void loop() {
   Serial.println(" rad/s");
 
   Serial.print("Temperature: ");
-  Serial.print(temp.temperature);
+  
+  float tempf = (temp.temperature * (9/5))+41;
+  Serial.print(tempf);
   Serial.println("degC");
 
   Serial.println("");
-  delay(50);
+  delay(500);
 }
