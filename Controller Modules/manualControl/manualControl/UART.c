@@ -18,11 +18,16 @@ void init_USART(void)
 }
 
 
-void USART_transmit(uint8_t data)
+void USART_transmit(uint32_t data)
 {
-	char transmit_buffer[10];
-	for 
+	int nDigits = log10(data)+1;
+	uint8_t transmit_buffer[10];
 	sprintf(transmit_buffer, "%d", data);
+	for (int i = 0; i < nDigits; i++)
+	{
+		while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
+		UDR0 = transmit_buffer[i];
+	}
 	while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
-	UDR0 = *transmit_buffer;
+	UDR0 = 0x0A;	//New Line
 }
