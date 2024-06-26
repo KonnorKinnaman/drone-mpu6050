@@ -23,14 +23,17 @@ void USART_transmit(uint32_t data)
 	int nDigits = log10(data)+1;
 	int numParser;
 	char transmit_buffer[10];
-	//sprintf(transmit_buffer, "%d", data);
+	
+	//Break data into 'digits' and store each digit as it's ASCII equivalent value
 	for (int i = nDigits; i > 0; i--)
 	{
-		numParser = data%10;
-		data = data/10;
-		transmit_buffer[i] = (char)numParser;
+		numParser = data % 10;
+		data = data / 10;
+		transmit_buffer[i] = numParser + '0';	//Convert Decimal to ASCII
 	}
-	for (int i = 0; i < nDigits; i++)
+	
+	//Transmit data
+	for (int i = 1; i < nDigits+1; i++)
 	{
 		while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
 		UDR0 = transmit_buffer[i];
