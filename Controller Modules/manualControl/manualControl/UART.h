@@ -16,7 +16,7 @@
 
 //Function Prototypes
 void init_USART(void);
-void USART_transmit(uint32_t data);
+void USART_transmit(uint16_t data);
 
 
 

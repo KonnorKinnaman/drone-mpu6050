@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <util/delay.h>
 #include "UART.h"
+#include "mpu6050.h"
 #define F_CPU 16000000UL
 
 void init_ALL(void);
@@ -16,8 +17,7 @@ void init_ALL(void);
 int main(void)
 {
 	
-	uint32_t testVal2 = 658358;
-	//float testVal = 135.467;
+	uint16_t testVal2 = 65.879;
     
     while (1) 
     {
