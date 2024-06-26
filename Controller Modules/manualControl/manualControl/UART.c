@@ -21,8 +21,15 @@ void init_USART(void)
 void USART_transmit(uint32_t data)
 {
 	int nDigits = log10(data)+1;
-	uint8_t transmit_buffer[10];
-	sprintf(transmit_buffer, "%d", data);
+	int numParser;
+	char transmit_buffer[10];
+	//sprintf(transmit_buffer, "%d", data);
+	for (int i = nDigits; i > 0; i--)
+	{
+		numParser = data%10;
+		data = data/10;
+		transmit_buffer[i] = (char)numParser;
+	}
 	for (int i = 0; i < nDigits; i++)
 	{
 		while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set

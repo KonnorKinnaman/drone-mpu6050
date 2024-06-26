@@ -16,7 +16,7 @@ void init_ALL(void);
 int main(void)
 {
 	
-	uint32_t testVal2 = 657365;
+	uint32_t testVal2 = 658358;
 	//float testVal = 135.467;
     
     while (1) 
