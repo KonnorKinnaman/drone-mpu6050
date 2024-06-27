@@ -8,5 +8,8 @@
 
 void init_I2C(void)
 {
+	PORTC4= 0xFF;
+	PORTC5 = 0xFF;
+	
 	
 }

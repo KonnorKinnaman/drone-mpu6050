@@ -10,11 +10,14 @@
 #define UART_H_
 #include <avr/io.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
+
+//Definitions
 #define F_CPU 16000000UL
 #define baud 57600
 
-//Function Prototypes
+//Function Protos
 void init_USART(void);
 void USART_transmit(uint16_t data);
 
