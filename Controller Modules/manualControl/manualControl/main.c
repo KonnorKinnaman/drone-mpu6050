@@ -18,21 +18,26 @@ int main(void)
 {
 	
 	int received_data = 0;
+	int16_t gx, gy, gz;
 	uint16_t testVal2 = 65.879;
 	uint8_t address = 0;
     
-	init_I2C();
 	//address = I2C_scan();
     while (1) 
     {
 		
-		received_data = I2C_recieve(104);
-		USART_int_transmit(received_data);
+		mpu6050_read_gyro(&gx, &gy, &gz);
+		USART_int_transmit(gx);
+		//USART_int_transmit(gy);
+		//USART_int_transmit(gz);
+		_delay_ms(1000);
     }
 }
 
 void init_ALL(void)
 {
 	init_USART();
+	init_I2C();
+	mpu6050_init();
 }
 

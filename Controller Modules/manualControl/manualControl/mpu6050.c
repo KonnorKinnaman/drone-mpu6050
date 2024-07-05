@@ -44,6 +44,65 @@ uint8_t I2C_scan(void)
 	return 0;
 }
 
+uint8_t I2C_start(void)
+{
+	TWCR = START;
+	while(!(TWCR & (1<<TWINT)));
+	
+	uint8_t status = TWSR & 0xF8;
+	if (status != 0x08 && status != 0x10)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+uint8_t I2C_write(uint8_t data)
+{
+	TWDR = data;
+	TWCR = CLEAR;
+	
+	while(!(TWCR & (1<<TWINT)));
+	
+	uint8_t status = TWSR & 0xF8;
+	if (status != 0x18 && status != 0x28)
+	{
+		return 0;
+	}
+	return 1;
+}
+
+uint8_t I2C_read_ACK(void)
+{
+	TWCR = (1<<TWEN)|(1<<TWINT)|(1<<TWEA);
+	while(!(TWCR & (1<<TWINT)));
+	
+	return TWDR;
+}
+
+uint8_t I2C_read_NACK(void)
+{
+	TWCR = (1<<TWEN)|(1<<TWINT);
+	while(!(TWCR & (1<<TWINT)));
+	
+	return TWDR;
+}
+
+void I2C_stop(void)
+{
+	TWCR = STOP;
+	while(TWCR & (1<<TWSTO));
+}
+
+void mpu6050_init(void)
+{
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(0x6B);
+	I2C_write(0x00);
+	I2C_stop();
+}
+
 uint16_t I2C_recieve(uint8_t address)
 {
 	int data = 0;
@@ -68,6 +127,11 @@ uint16_t I2C_recieve(uint8_t address)
 	TWDR = ((address<<1) | PORTC4);
 	while (!(TWCR & (1<< TWINT)));
 	
+	while (TWSR != 0x48)
+	{
+		data = TWDR;
+		USART_int_transmit(data);
+	}
 	if (TWSR == 0x38)
 	{
 		USART_char_transmit("Arbitration Lost");
@@ -79,7 +143,7 @@ uint16_t I2C_recieve(uint8_t address)
 	}
 	else if (TWSR == 0x48)
 	{
-		USART_char_transmit("No Acknowledgment from Device: Attempting to Fix");
+		USART_char_transmit("No Acknowledgment from Device: Data Transfer Complete");
 		data = TWDR*100;
 		
 	}
@@ -92,4 +156,20 @@ uint16_t I2C_recieve(uint8_t address)
 	}
 	TWCR = STOP;
 	return data;
+}
+
+void mpu6050_read_gyro(int16_t *gx, int16_t *gy, int16_t *gz)
+{
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(0x43);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	
+	*gx = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
+	*gy = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
+	*gz = ((int16_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	
+	I2C_stop();
+	
 }

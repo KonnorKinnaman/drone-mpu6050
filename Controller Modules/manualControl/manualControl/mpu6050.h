@@ -21,6 +21,7 @@
 #define R_START (1<<TWINT)|(1<<TWSTA)|(0<<TWSTO)|(1<<TWEN)
 #define STOP (1<<TWINT)|(0<<TWSTA)|(1<<TWSTO)|(1<<TWEN)
 #define CLEAR (1<<TWINT)|(0<<TWSTA)|(0<<TWSTO)|(1<<TWEN)
+#define MPU6050_ADDR 0x68
 
 
 typedef enum
@@ -54,7 +55,16 @@ enum
 //Function Prototypes
 void init_I2C(void);
 uint8_t I2C_scan(void);
+uint8_t I2C_start(void);
+void I2C_stop(void);
+uint8_t I2C_write(uint8_t data);
+uint8_t I2C_read_ACK(void);
+uint8_t I2C_read_NACK(void);
+
+void mpu6050_init(void);
 uint16_t I2C_recieve(uint8_t address);
+void mpu6050_init(void);
+void mpu6050_read_gyro(int16_t *gx, int16_t *gy, int16_t *gz);
 
 
 
