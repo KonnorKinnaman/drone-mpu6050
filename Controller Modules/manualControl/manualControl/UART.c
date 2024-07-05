@@ -18,7 +18,7 @@ void init_USART(void)
 }
 
 
-void USART_transmit(uint16_t data)
+void USART_int_transmit(uint16_t data)
 {
 	int nDigits = log10(data)+1;
 	int numParser;
@@ -40,4 +40,28 @@ void USART_transmit(uint16_t data)
 	}
 	while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
 	UDR0 = 0x0A;	//New Line
+}
+
+void USART_char_transmit(const char *buffer)
+{
+	while(*buffer)
+	{
+		while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
+		UDR0 = *buffer; //set UDR0 to character
+		buffer++;
+	}
+	while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
+	UDR0 = 0x0A;
+}
+
+void USART_hex_transmit(uint16_t data)
+{
+	//Convert int to hex - WIP
+	char HexReference[] = "0123456789abcdef";
+	char hex_data = 0;
+	/*while(data--)
+	{
+		*hex_data++ = HexReference[]
+	}*/
+	
 }

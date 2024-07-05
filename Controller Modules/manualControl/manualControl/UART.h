@@ -17,9 +17,11 @@
 #define F_CPU 16000000UL
 #define baud 57600
 
-//Function Protos
+//Function Prototypes
 void init_USART(void);
-void USART_transmit(uint16_t data);
+void USART_int_transmit(uint16_t data);
+void USART_char_transmit(const char *buffer);
+void USART_hex_transmit(uint16_t data);
 
 
 

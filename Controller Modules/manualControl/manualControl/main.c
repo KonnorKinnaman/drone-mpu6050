@@ -17,12 +17,17 @@ void init_ALL(void);
 int main(void)
 {
 	
+	int received_data = 0;
 	uint16_t testVal2 = 65.879;
+	uint8_t address = 0;
     
+	init_I2C();
+	//address = I2C_scan();
     while (1) 
     {
-		USART_transmit(testVal2);
-		//_delay_ms(500);
+		
+		received_data = I2C_recieve(104);
+		USART_int_transmit(received_data);
     }
 }
 
