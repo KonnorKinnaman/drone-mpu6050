@@ -15,35 +15,6 @@ void init_I2C(void)
 	TWBR = ((F_CPU/SCL_CLOCK) - 16) / 2;	//Set Baud Rate for Transmission
 }
 
-uint8_t I2C_scan(void)
-{
-	//Scan all possible address for slave device
-	for (uint8_t address = 1; address < 128; address++)
-	{
-		TWCR = START;
-		while (!(TWCR & (1<<TWINT)));
-		
-		while (TWSR != 0x08)
-		{
-			USART_char_transmit("Start condition not transmitted");
-		}
-		
-		TWDR = (address<<1);
-		TWCR = CLEAR;
-		while(!(TWCR & (1<<TWINT)));
-		
-		if (TWSR == 0x18 || TWSR == 0x40)
-		{
-			USART_char_transmit("Device Found at:");
-			USART_int_transmit(address);
-			return address;
-		}
-		TWCR = STOP;
-	}
-	USART_char_transmit("No Devices Found");
-	return 0;
-}
-
 uint8_t I2C_start(void)
 {
 	TWCR = START;
@@ -59,6 +30,7 @@ uint8_t I2C_start(void)
 
 uint8_t I2C_write(uint8_t data)
 {
+	//Write to I2C device
 	TWDR = data;
 	TWCR = CLEAR;
 	
@@ -74,6 +46,7 @@ uint8_t I2C_write(uint8_t data)
 
 uint8_t I2C_read_ACK(void)
 {
+	//Device Acknowledged
 	TWCR = (1<<TWEN)|(1<<TWINT)|(1<<TWEA);
 	while(!(TWCR & (1<<TWINT)));
 	
@@ -82,6 +55,7 @@ uint8_t I2C_read_ACK(void)
 
 uint8_t I2C_read_NACK(void)
 {
+	//Device not Acknowledged
 	TWCR = (1<<TWEN)|(1<<TWINT);
 	while(!(TWCR & (1<<TWINT)));
 	
@@ -90,86 +64,137 @@ uint8_t I2C_read_NACK(void)
 
 void I2C_stop(void)
 {
+	//Stop I2C Communication
 	TWCR = STOP;
 	while(TWCR & (1<<TWSTO));
 }
 
 void mpu6050_init(void)
 {
+	//Initialize mpu6050
 	I2C_start();
-	I2C_write(MPU6050_ADDR << 1);
-	I2C_write(0x6B);
-	I2C_write(0x00);
+	I2C_write(MPU6050_ADDR << 1);	//Send address with write bit
+	I2C_write(0x6B);	//Access PWR_MGMT_1 register
+	I2C_write(0x00);	//Start mpu6050 module
 	I2C_stop();
 }
 
-uint16_t I2C_recieve(uint8_t address)
+void mpu6050_read_gyro_x(int8_t *gx)
 {
-	int data = 0;
-	TWCR = START;
-	while (!(TWCR & (1<<TWINT)))
-	{
-		USART_char_transmit("Waiting for Acknowledgment of START");
-	}
-	USART_char_transmit("START Acknowledged");
-	while (TWSR != 0x08)
-	{
-		uint16_t error = 0;
-		USART_char_transmit("An Error Occurred While Initializing I2C");
-		USART_char_transmit("Expected 08 but got the following:");
-		error = TWSR;
-		USART_int_transmit(error);
-		_delay_ms(1000);
-		
-	}
-	USART_char_transmit("I2C Initialization Successful");
-	TWCR = CLEAR;
-	TWDR = ((address<<1) | PORTC4);
-	while (!(TWCR & (1<< TWINT)));
+	int8_t gyro_xh;
+	int8_t gyro_xl;
 	
-	while (TWSR != 0x48)
-	{
-		data = TWDR;
-		USART_int_transmit(data);
-	}
-	if (TWSR == 0x38)
-	{
-		USART_char_transmit("Arbitration Lost");
-	}
-	else if (TWSR == 0x40)
-	{
-		USART_char_transmit("Mode Transmitted: Master Receive Mode. Device Acknowledged");
-		data = TWDR*100;
-	}
-	else if (TWSR == 0x48)
-	{
-		USART_char_transmit("No Acknowledgment from Device: Data Transfer Complete");
-		data = TWDR*100;
-		
-	}
-	else
-	{
-		USART_char_transmit("Did not register valid status code!");
-		USART_char_transmit("Expected 38, 40, or 48, but received the following:");
-		USART_int_transmit(TWSR);
-		
-	}
-	TWCR = STOP;
-	return data;
-}
-
-void mpu6050_read_gyro(int16_t *gx, int16_t *gy, int16_t *gz)
-{
+	//Read from upper GYRO_X register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);	//Send address with write bit
+	I2C_write(GYRO_XOUT_H);	
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);	
+	gyro_xh = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	//Read from lower GYRO_X register
 	I2C_start();
 	I2C_write(MPU6050_ADDR << 1);
-	I2C_write(0x43);
+	I2C_write(GYRO_XOUT_L);
 	I2C_start();
 	I2C_write((MPU6050_ADDR << 1) | 1);
-	
-	*gx = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
-	*gy = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
-	*gz = ((int16_t)I2C_read_ACK() << 8 | I2C_read_NACK());
-	
+	gyro_xl = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	//*gy = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
+	//*gz = ((int16_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	*gx = (gyro_xh << 8) | gyro_xl ;
 	I2C_stop();
 	
+}
+
+void mpu6050_read_gyro_y(int16_t *gy)
+{
+	int8_t gyro_yh;
+	int8_t gyro_yl;
+	
+	//Read from upper GYRO_Y register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(GYRO_YOUT_H);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	gyro_yh = ((int8_t)I2C_read_ACK()<< 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	//Read from lower GYRO_Y register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(GYRO_YOUT_L);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	gyro_yl = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	*gy = (gyro_yh << 8) | gyro_yl;
+}
+
+void mpu6050_read_accel_x(int16_t *ax)
+{
+	int8_t accel_xh;
+	int8_t accel_xl;
+	
+	//Read from upper ACCEL_X register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(ACCEL_XOUT_H);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	accel_xh = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	//Read from lower ACCEL_X register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(ACCEL_XOUT_L);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	accel_xl = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	*ax = (accel_xh << 8) | accel_xl;
+}
+
+void mpu6050_read_accel_y(int16_t *ay)
+{
+	int8_t accel_yh;
+	int8_t accel_yl;
+	
+	//Read from upper ACCEL_Y register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(ACCEL_YOUT_H);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	accel_yh = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	//Read from lower ACCEL_Y register
+	I2C_start();
+	I2C_write(MPU6050_ADDR << 1);
+	I2C_write(ACCEL_YOUT_L);
+	I2C_start();
+	I2C_write((MPU6050_ADDR << 1) | 1);
+	accel_yl = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
+	I2C_stop();
+	
+	*ay = (accel_yh << 8) | accel_yl;
+}
+
+void filterOuptut(float KalmanState, float KalmanUnc, float KalmanInput,  float KalmanMeas, const float *KFilterOut)
+{
+	float KalmanGain;
+	KalmanState = KalmanState + 0.004 * KalmanInput;
+	KalmanUnc = KalmanUnc + 0.004 * 0.004 * 4 * 4;
+	
+	float KalmanGain = KalmanUnc * 1/(1*KalmanUnc + 3 * 3);
+	KalmanState = KalmanState + KalmanGain * (KalmanMeas - KalmanState);
+	KalmanUnc = (1-KalmanGain) * KalmanUnc;
+	
+	*KFilterOut[0] = KalmanState;
+	*KFilterOut[1] = KalmanUnc;
 }
