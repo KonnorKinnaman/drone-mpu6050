@@ -69,7 +69,7 @@ uint8_t I2C_read_ACK(void);
 uint8_t I2C_read_NACK(void);
 
 void mpu6050_init(void);
-void mpu6050_read_gyro_x(int8_t *gx);
+void mpu6050_read_gyro_x(int16_t *gx);
 void mpu6050_read_gyro_y(int16_t *gy);
 void mpu6050_read_accel_x(int16_t *ax);
 void mpu6050_read_accel_y(int16_t *ay);

@@ -54,6 +54,25 @@ void USART_char_transmit(const char *buffer)
 	UDR0 = 0x0A;
 }
 
+void USART_float_transmit(float input, int decimals)
+{
+	int digit;
+	char buffer[10];
+	int integer = (int)input;
+	float fraction = input - integer;
+	sprintf(buffer, "%d.", integer);
+	
+	for(int i = 0; i < decimals; i++)
+	{
+		fraction *= 10;
+		int digit = (int)fraction;
+		sprintf(buffer +strlen(buffer), "%d", digit);
+		fraction -= digit;
+	}
+	
+	USART_char_transmit(buffer);
+}
+
 void USART_hex_transmit(uint16_t data)
 {
 	//Convert int to hex - WIP

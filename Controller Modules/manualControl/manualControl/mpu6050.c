@@ -79,7 +79,7 @@ void mpu6050_init(void)
 	I2C_stop();
 }
 
-void mpu6050_read_gyro_x(int8_t *gx)
+void mpu6050_read_gyro_x(int16_t *gx)
 {
 	int8_t gyro_xh;
 	int8_t gyro_xl;
@@ -191,10 +191,10 @@ void filterOuptut(float KalmanState, float KalmanUnc, float KalmanInput,  float 
 	KalmanState = KalmanState + 0.004 * KalmanInput;
 	KalmanUnc = KalmanUnc + 0.004 * 0.004 * 4 * 4;
 	
-	float KalmanGain = KalmanUnc * 1/(1*KalmanUnc + 3 * 3);
+	KalmanGain = KalmanUnc * 1/(1*KalmanUnc + 3 * 3);
 	KalmanState = KalmanState + KalmanGain * (KalmanMeas - KalmanState);
 	KalmanUnc = (1-KalmanGain) * KalmanUnc;
 	
-	*KFilterOut[0] = KalmanState;
-	*KFilterOut[1] = KalmanUnc;
+	//*KFilterOut[0] = KalmanState;
+	//*KFilterOut[1] = KalmanUnc;
 }
