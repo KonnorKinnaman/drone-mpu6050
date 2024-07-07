@@ -10,18 +10,20 @@
 #include <util/delay.h>
 #include "UART.h"
 #include "mpu6050.h"
+#include "Joystick.h"
 //#include "serial.c"
 #define F_CPU 16000000UL
+#define JOYSTICK_Y 0
 
 void init_ALL(void);
+void collect_mpu_data(uint16_t *mpu_data);
+void collect_joystick_data(void);
 
 int main(void)
 {
 	init_ALL();
-	int received_data = 0;
-	int16_t gx, gy;
-	int16_t ax, ay;
-	float gyro_x_deg, gyro_y_deg;
+	uint16_t mpu_data[4];
+	uint16_t joystick_y;
 	
 	//Kalman Filter Constants Assuming Level Take-Off Plane and Std Dev of 2 Degrees
 	float K_AngleRoll=0, K_UncAngleRoll = 2 * 2;
@@ -32,21 +34,19 @@ int main(void)
     
     while (1) 
     {
+		//collect_mpu_data();
+		//filterOuptut()
+		//USART_char_transmit("Data");
+		//USART_float_transmit(mpu_data[0], 4, NEWLINE);
+		//USART_int_transmit(gy);
+		//USART_char_transmit("Accelerometer Output");
+		//USART_int_transmit(ax);
+		//USART_int_transmit(ay);
 		
-		mpu6050_read_gyro_x(&gx);
-		mpu6050_read_gyro_y(&gy);
-		mpu6050_read_accel_x(&ax);
-		mpu6050_read_accel_y(&ay);
-		gyro_x_deg = gx/131.0;
-		int8_t scaled_x = gx/2;
-		
-		USART_char_transmit("Gyroscope Output");
-		USART_float_transmit(gyro_x_deg, 2);
-		USART_int_transmit(gy);
-		USART_char_transmit("Accelerometer Output");
-		USART_int_transmit(ax);
-		USART_int_transmit(ay);
-		_delay_ms(1000);
+		joystick_y = read_ADC(JOYSTICK_Y);
+		USART_char_transmit("Joystick Data", NEWLINE);
+		USART_int_transmit(joystick_y);
+		_delay_ms(800);
     }
 }
 
@@ -55,5 +55,25 @@ void init_ALL(void)
 	//init_USART();
 	init_I2C();
 	mpu6050_init();
+	init_ADC();
+}
+
+void collect_mpu_data(uint16_t *mpu_data)
+{
+	uint16_t gx, gy;
+	uint16_t ax, ay;
+	float gyro_x_deg, gyro_y_deg;
+	
+	mpu6050_read_gyro_x(&gx);
+	mpu6050_read_gyro_y(&gy);
+	gyro_x_deg = gx/131.0;
+	gyro_y_deg = gy/131.0;
+	
+	mpu_data[0,1] = gyro_x_deg, gyro_y_deg;
+	
+	mpu6050_read_accel_x(&ax);
+	mpu6050_read_accel_y(&ay);
+	
+	mpu_data[2,3] = ax, ay;
 }
 

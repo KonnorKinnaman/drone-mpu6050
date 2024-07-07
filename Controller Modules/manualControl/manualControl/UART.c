@@ -20,41 +20,63 @@ void init_USART(void)
 
 void USART_int_transmit(uint16_t data)
 {
-	int nDigits = log10(data)+1;
-	int numParser;
-	char transmit_buffer[10];
-	
-	//Break data into 'digits' and store each digit as it's ASCII equivalent value
-	for (int i = nDigits; i > 0; i--)
+	//Exception handler for 0
+	if (data == 0)
 	{
-		numParser = data % 10;
-		data = data / 10;
-		transmit_buffer[i] = numParser + '0';	//Convert Decimal to ASCII
+		while ((UCSR0A & (1<<UDRE0))==0);
+		UDR0 = 0x30;
 	}
-	
-	//Transmit data
-	for (int i = 1; i < nDigits+1; i++)
+	else
 	{
-		while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
-		UDR0 = transmit_buffer[i];
+		int nDigits = log10(data)+1;
+		int numParser;
+		char transmit_buffer[10];
+		
+		//Break data into 'digits' and store each digit as it's ASCII equivalent value
+		for (int i = nDigits; i > 0; i--)
+		{
+			numParser = data % 10;
+			data = data / 10;
+			transmit_buffer[i] = numParser + '0';	//Convert Decimal to ASCII
+		}
+		
+		//Transmit data
+		for (int i = 1; i < nDigits+1; i++)
+		{
+			while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
+			UDR0 = transmit_buffer[i];
+		}
 	}
 	while ((UCSR0A & (1<<UDRE0))==0);	//wait for flag to be set
 	UDR0 = 0x0A;	//New Line
 }
 
-void USART_char_transmit(const char *buffer)
+void USART_char_transmit(const char *buffer, int mode)
 {
+	if (mode == NULL)
+	{
+		mode = NONE;
+	}
+	
+	if (mode == LOGGING)
+	{
+		while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
+		UDR0 = 0x1B;
+	}
 	while(*buffer)
 	{
 		while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
 		UDR0 = *buffer; //set UDR0 to character
 		buffer++;
 	}
-	while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
-	UDR0 = 0x0A;
+	if (1)
+	{
+		while((UCSR0A & (1<<UDRE0)) == 0); //wait for flag to be set
+		UDR0 = 0x0A;	
+	}
 }
 
-void USART_float_transmit(float input, int decimals)
+void USART_float_transmit(float input, int decimals, int mode)
 {
 	int digit;
 	char buffer[10];
@@ -70,7 +92,7 @@ void USART_float_transmit(float input, int decimals)
 		fraction -= digit;
 	}
 	
-	USART_char_transmit(buffer);
+	USART_char_transmit(buffer, mode);
 }
 
 void USART_hex_transmit(uint16_t data)

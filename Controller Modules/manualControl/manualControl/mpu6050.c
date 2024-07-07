@@ -3,6 +3,11 @@
  *
  * Created: 6/25/2024 10:25:01 PM
  *  Author: Konnor Kinnaman
+ *
+ *	This module allows the atmega328p to interface with the mpu6050 using the I2C protocol.
+ *	The protocol is initialized with some basic functions, which are then used to start the mpu
+ *	and request/read data from the registers for its accelerometer and gyroscope. A Kalman filter
+ *	is then applied to the data to create an accurate transform of the mpu model.
  */ 
 #include "mpu6050.h"
 
@@ -79,7 +84,7 @@ void mpu6050_init(void)
 	I2C_stop();
 }
 
-void mpu6050_read_gyro_x(int16_t *gx)
+void mpu6050_read_gyro_x(uint16_t *gx)
 {
 	int8_t gyro_xh;
 	int8_t gyro_xl;
@@ -100,14 +105,12 @@ void mpu6050_read_gyro_x(int16_t *gx)
 	I2C_start();
 	I2C_write((MPU6050_ADDR << 1) | 1);
 	gyro_xl = ((int8_t)I2C_read_ACK() << 8 | I2C_read_NACK());
-	//*gy = ((int16_t)I2C_read_ACK() << 8 | I2C_read_ACK());
-	//*gz = ((int16_t)I2C_read_ACK() << 8 | I2C_read_NACK());
 	*gx = (gyro_xh << 8) | gyro_xl ;
 	I2C_stop();
 	
 }
 
-void mpu6050_read_gyro_y(int16_t *gy)
+void mpu6050_read_gyro_y(uint16_t *gy)
 {
 	int8_t gyro_yh;
 	int8_t gyro_yl;
@@ -133,7 +136,7 @@ void mpu6050_read_gyro_y(int16_t *gy)
 	*gy = (gyro_yh << 8) | gyro_yl;
 }
 
-void mpu6050_read_accel_x(int16_t *ax)
+void mpu6050_read_accel_x(uint16_t *ax)
 {
 	int8_t accel_xh;
 	int8_t accel_xl;
@@ -159,7 +162,7 @@ void mpu6050_read_accel_x(int16_t *ax)
 	*ax = (accel_xh << 8) | accel_xl;
 }
 
-void mpu6050_read_accel_y(int16_t *ay)
+void mpu6050_read_accel_y(uint16_t *ay)
 {
 	int8_t accel_yh;
 	int8_t accel_yl;
@@ -185,7 +188,7 @@ void mpu6050_read_accel_y(int16_t *ay)
 	*ay = (accel_yh << 8) | accel_yl;
 }
 
-void filterOuptut(float KalmanState, float KalmanUnc, float KalmanInput,  float KalmanMeas, const float *KFilterOut)
+void filterOuptut(float KalmanState, float KalmanUnc, float KalmanInput,  float KalmanMeas, float *KFilterOut)
 {
 	float KalmanGain;
 	KalmanState = KalmanState + 0.004 * KalmanInput;
@@ -195,6 +198,6 @@ void filterOuptut(float KalmanState, float KalmanUnc, float KalmanInput,  float 
 	KalmanState = KalmanState + KalmanGain * (KalmanMeas - KalmanState);
 	KalmanUnc = (1-KalmanGain) * KalmanUnc;
 	
-	//*KFilterOut[0] = KalmanState;
-	//*KFilterOut[1] = KalmanUnc;
+	//KFilterOut[0] = KalmanState;
+	//KFilterOut[1] = KalmanUnc;
 }

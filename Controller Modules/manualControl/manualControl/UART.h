@@ -17,11 +17,17 @@
 #define F_CPU 16000000UL
 #define baud 57600
 
+enum mode {
+	NEWLINE,
+	LOGGING,
+	NONE
+	};
+
 //Function Prototypes
 void init_USART(void);
 void USART_int_transmit(uint16_t data);
-void USART_char_transmit(const char *buffer);
-void USART_float_transmit(float input, int decimalst);
+void USART_char_transmit(const char *buffer, int mode);
+void USART_float_transmit(float input, int decimals, int mode);
 void USART_hex_transmit(uint16_t data);
 
 
