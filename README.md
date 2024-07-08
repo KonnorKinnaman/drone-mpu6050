@@ -12,7 +12,7 @@ used to test the hardware in the Arduino IDE.
 * Analog Joystick - for controlling propellor speed
 * Adafruit MPM3610 Buck Converter - Converts 9V from battery to 5V for all modules
 * Adafruit Bidirectional Level Shifter - Converts 5V logic to 3.3V logic for transceiver
-* Transceiver - TBD
+* nRF24L01+ Transmitter
 * 9V Battery
 
 ### On the Drone
@@ -33,5 +33,7 @@ argument and command for flashing the 328p.
 
 manualControl project files includes modules for UART. These modules were only meant to be used during
 testing and development, and will not be used in the final product.
+
+Betaflight Configurator was used for flashing the flight controller, but not included in the repo
 
 Images of the finished project will be put in the images folder when all parts are finished and solidified.
