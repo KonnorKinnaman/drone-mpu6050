@@ -11,14 +11,15 @@ used to test the hardware in the Arduino IDE.
 * MPU6050 Module -  for Accelerometer and Gyroscope
 * Analog Joystick - for controlling propellor speed
 * Adafruit MPM3610 Buck Converter - Converts 9V from battery to 5V for all modules
-* Adafruit Bidirectional Level Shifter - Converts 5V logic to 3.3V logic for transceiver
+* Adafruit 8 Channel Bidirectional Level Shifter - Converts 5V logic to 3.3V logic for SPI transceiver
 * nRF24L01+ Transmitter
 * 9V Battery
 
 ### On the Drone
 * Betaflight OMNIBUSF4SD with STM32F405
 * Mateksys Power Distribution Board
-* Fli14+ V1 receiver
+* nRF24L01+ Transmitter
+   * Atmega328p as translater for OMNIBUS
 * BLHELI 20A ESC's (x4)
 * 2204-2300KV Brushless Motors (x4)
 * 5045R Propellers
