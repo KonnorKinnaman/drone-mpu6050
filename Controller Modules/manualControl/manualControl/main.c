@@ -11,7 +11,6 @@
 #include "UART.h"
 #include "mpu6050.h"
 #include "Joystick.h"
-//#include "serial.c"
 #define F_CPU 16000000UL
 #define JOYSTICK_Y 0
 
@@ -45,6 +44,18 @@ int main(void)
 		
 		joystick_y = read_ADC(JOYSTICK_Y);
 		USART_char_transmit("Joystick Data", NEWLINE);
+		if (joystick_y == 520)
+		{
+			USART_char_transmit("Neutral", NEWLINE);
+		}
+		else if (520 < joystick_y < 760)
+		{
+			USART_char_transmit("Half Throttle", NEWLINE);
+		}
+		else if (761 < joystick_y < 1024)
+		{
+			USART_char_transmit("Full Throttle", NEWLINE);
+		}
 		USART_int_transmit(joystick_y);
 		_delay_ms(800);
     }

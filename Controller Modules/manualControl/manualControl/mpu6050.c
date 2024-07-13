@@ -8,6 +8,8 @@
  *	The protocol is initialized with some basic functions, which are then used to start the mpu
  *	and request/read data from the registers for its accelerometer and gyroscope. A Kalman filter
  *	is then applied to the data to create an accurate transform of the mpu model.
+ *
+ * OCCUPIES PINS: PC4, PC5
  */ 
 #include "mpu6050.h"
 

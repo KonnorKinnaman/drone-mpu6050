@@ -9,6 +9,8 @@
  *	of 128. The channel of the joystick y value (0) is passed into
  *	ADC Multiplexer with a safety mask and the result is returned
  *	as a 10 bit number.
+ *
+ *	OCCUPIES PINS: PC0
  */ 
 
 #include "Joystick.h"
