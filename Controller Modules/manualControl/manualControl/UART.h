@@ -17,11 +17,11 @@
 #define F_CPU 16000000UL
 #define baud 57600
 
-enum mode {
+enum {
 	NEWLINE,
 	LOGGING,
 	NONE
-	};
+	} mode;
 
 //Function Prototypes
 void init_USART(void);

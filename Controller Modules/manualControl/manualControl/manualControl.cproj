@@ -148,6 +148,12 @@
     <Compile Include="mpu6050.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="nRF24l01.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="nRF24l01.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="UART.c">
       <SubType>compile</SubType>
     </Compile>

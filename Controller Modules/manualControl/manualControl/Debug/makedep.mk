@@ -8,5 +8,7 @@ main.c
 
 mpu6050.c
 
+nRF24l01.c
+
 UART.c
 

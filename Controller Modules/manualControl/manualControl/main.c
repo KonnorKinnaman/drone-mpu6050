@@ -11,6 +11,7 @@
 #include "UART.h"
 #include "mpu6050.h"
 #include "Joystick.h"
+#include "nRF24l01.h"
 #define F_CPU 16000000UL
 #define JOYSTICK_Y 0
 
@@ -30,6 +31,8 @@ int main(void)
 	float K1DFilterOutput[] = {0,0};	//{angle_prediction, uncertainty_of_prediction}
 	float testVal2 = 65.879;
 	uint8_t address = 0;
+	
+	init_nRF();
     
     while (1) 
     {
@@ -42,6 +45,7 @@ int main(void)
 		//USART_int_transmit(ax);
 		//USART_int_transmit(ay);
 		
+		/*
 		joystick_y = read_ADC(JOYSTICK_Y);
 		USART_char_transmit("Joystick Data", NEWLINE);
 		if (joystick_y == 520)
@@ -58,6 +62,10 @@ int main(void)
 		}
 		USART_int_transmit(joystick_y);
 		_delay_ms(800);
+		
+		_delay_ms(100); */
+		
+		
     }
 }
 
@@ -67,6 +75,7 @@ void init_ALL(void)
 	init_I2C();
 	mpu6050_init();
 	init_ADC();
+	SPI_init();
 }
 
 void collect_mpu_data(uint16_t *mpu_data)

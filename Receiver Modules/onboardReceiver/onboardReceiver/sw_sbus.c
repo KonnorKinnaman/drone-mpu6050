@@ -54,7 +54,7 @@ void transmit_sbus_frame(uint16_t* channels)
 {
 	uint8_t sbusFrame[25];
 	
-	// Start byte
+	// Start subFrame
 	sbusFrame[0] = 0x0F;
 	
 	// 16 channels data (22 bytes)
@@ -83,7 +83,7 @@ void transmit_sbus_frame(uint16_t* channels)
 	
 	sbusFrame[23] = 0x00; //Use for failsafe
 	
-	sbusFrame[24] = 0x00; //End byte
+	sbusFrame[24] = 0x00; //End subFrame
 	
 	for (uint8_t i = 0; i < 25; i++) {
 		USART_int_transmit(sbusFrame[i]);
